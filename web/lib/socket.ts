@@ -2,9 +2,18 @@ import { io } from 'socket.io-client';
 
 /**
  * Instance Socket.IO connectée au serveur NestJS.
- * Cette instance est partagée dans toute l'application web
- * pour recevoir les événements en temps réel.
+ * Utilise NEXT_PUBLIC_API_URL en production (Vercel)
+ * et fallback sur localhost en développement.
  */
-const socket = io('http://localhost:3000');
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+
+const socket = io(API_URL, {
+  transports: ['polling', 'websocket'],   // Important pour le déploiement
+  reconnection: true,
+  reconnectionAttempts: 5,
+  reconnectionDelay: 1000,
+  timeout: 20000,
+  autoConnect: true,
+});
 
 export default socket;
