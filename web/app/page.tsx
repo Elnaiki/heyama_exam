@@ -50,8 +50,8 @@ export default function Home() {
   const fetchObjects = async () => {
     try {
       const res = await axios.get(`${API}/objects`);
-      setObjects(res.data);
-    } catch (error: any) {
+      setObjects(res.data || []);
+    } catch (error) {
       console.error("Erreur fetch objects:", error);
       toast.error("Impossible de charger les objets");
     }
@@ -76,7 +76,7 @@ export default function Home() {
     formData.append('image', image);
 
     try {
-      const res = await axios.post(`${API}/objects`, formData, {
+      await axios.post(`${API}/objects`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
         timeout: 30000,
       });
@@ -85,9 +85,14 @@ export default function Home() {
       setDescription('');
       setImage(null);
       setPreview(null);
+
       toast.success('Objet créé avec succès !');
+
+      // Rechargement forcé de la liste
+      setTimeout(fetchObjects, 800);
+
     } catch (error: any) {
-      console.error("Erreur création objet:", error);
+      console.error("Erreur création :", error);
       toast.error(error.response?.data?.message || 'Erreur lors de la création !');
     } finally {
       setLoading(false);
