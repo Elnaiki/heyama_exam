@@ -28,6 +28,7 @@ export default function Home() {
   const [preview, setPreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  // Charger les objets au démarrage + écouter les événements Socket.IO
   useEffect(() => {
     fetchObjects();
 
@@ -51,7 +52,7 @@ export default function Home() {
     try {
       const res = await axios.get(`${API}/objects`);
       setObjects(res.data);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Erreur fetch objects:", error);
       toast.error("Impossible de charger les objets");
     }
@@ -76,16 +77,22 @@ export default function Home() {
     formData.append('image', image);
 
     try {
-      const res = await axios.post(`${API}/objects`, formData, {
+      await axios.post(`${API}/objects`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
         timeout: 30000,
       });
 
+      // Reset du formulaire
       setTitle('');
       setDescription('');
       setImage(null);
       setPreview(null);
+
       toast.success('Objet créé avec succès !');
+
+      // Recharger la liste immédiatement après création
+      fetchObjects();
+
     } catch (error: any) {
       console.error("Erreur création objet:", error);
       toast.error(error.response?.data?.message || 'Erreur lors de la création !');
@@ -98,6 +105,7 @@ export default function Home() {
     try {
       await axios.delete(`${API}/objects/${id}`);
       toast.success('Objet supprimé !');
+      // La suppression sera aussi gérée par Socket.IO
     } catch (error) {
       console.error("Erreur suppression:", error);
       toast.error('Erreur lors de la suppression');
@@ -114,6 +122,7 @@ export default function Home() {
       </div>
 
       <div className="container mx-auto px-6 py-10 grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Formulaire de création */}
         <div className="lg:col-span-1">
           <Card className="border border-blue-100 shadow-md sticky top-6">
             <CardHeader className="bg-blue-50 rounded-t-xl">
@@ -165,6 +174,7 @@ export default function Home() {
           </Card>
         </div>
 
+        {/* Liste des objets */}
         <div className="lg:col-span-2">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-gray-800">
