@@ -1,12 +1,10 @@
 import { io } from 'socket.io-client';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
-
-const socket = io(API_URL, {
-  transports: ['polling', 'websocket'],
-  reconnection: true,
-  reconnectionAttempts: 5,
-  timeout: 20000,
-});
+/**
+ * Instance Socket.IO connectée au serveur NestJS.
+ * Cette instance est partagée dans toute l'application web
+ * pour recevoir les événements en temps réel.
+ */
+const socket = io('http://localhost:3000');
 
 export default socket;

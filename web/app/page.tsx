@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 
-const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+const API = 'http://localhost:3000';
 
 interface ObjectItem {
   _id: string;
@@ -30,17 +30,14 @@ export default function Home() {
 
   useEffect(() => {
     fetchObjects();
-
     socket.on('newObject', (obj: ObjectItem) => {
       setObjects((prev) => [obj, ...prev]);
       toast.success('Nouvel objet ajouté en temps réel !');
     });
-
     socket.on('deletedObject', (id: string) => {
       setObjects((prev) => prev.filter((o) => o._id !== id));
       toast.success('Objet supprimé en temps réel !');
     });
-
     return () => {
       socket.off('newObject');
       socket.off('deletedObject');
@@ -48,13 +45,8 @@ export default function Home() {
   }, []);
 
   const fetchObjects = async () => {
-    try {
-      const res = await axios.get(`${API}/objects`);
-      setObjects(res.data || []);
-    } catch (error) {
-      console.error("Erreur fetch objects:", error);
-      toast.error("Impossible de charger les objets");
-    }
+    const res = await axios.get(`${API}/objects`);
+    setObjects(res.data);
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -68,45 +60,28 @@ export default function Home() {
       toast.error('Remplis tous les champs !');
       return;
     }
-
     setLoading(true);
     const formData = new FormData();
     formData.append('title', title);
     formData.append('description', description);
     formData.append('image', image);
-
     try {
-      await axios.post(`${API}/objects`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-        timeout: 30000,
-      });
-
+      await axios.post(`${API}/objects`, formData);
       setTitle('');
       setDescription('');
       setImage(null);
       setPreview(null);
-
       toast.success('Objet créé avec succès !');
-
-      // Rechargement forcé de la liste
-      setTimeout(fetchObjects, 800);
-
-    } catch (error: any) {
-      console.error("Erreur création :", error);
-      toast.error(error.response?.data?.message || 'Erreur lors de la création !');
-    } finally {
-      setLoading(false);
+    } catch {
+      toast.error('Erreur lors de la création !');
     }
+    setLoading(false);
   };
 
   const handleDelete = async (id: string) => {
-    try {
-      await axios.delete(`${API}/objects/${id}`);
-      toast.success('Objet supprimé !');
-    } catch (error) {
-      console.error("Erreur suppression:", error);
-      toast.error('Erreur lors de la suppression');
-    }
+    await axios.delete(`${API}/objects/${id}`);
+    setObjects((prev) => prev.filter((o) => o._id !== id));
+    toast.success('Objet supprimé !');
   };
 
   return (

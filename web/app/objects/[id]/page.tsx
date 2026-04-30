@@ -1,15 +1,16 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
 import axios from 'axios';
-import Link from 'next/link';
+import { useParams } from 'next/navigation';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { toast } from 'sonner';
+import Link from 'next/link';
 
-const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+/** URL de base de l'API NestJS */
+const API = 'http://localhost:3000';
 
+/** Structure d'un objet retourné par l'API */
 interface ObjectItem {
   _id: string;
   title: string;
@@ -18,85 +19,58 @@ interface ObjectItem {
   createdAt: string;
 }
 
+/**
+ * Page de détail d'un objet.
+ * Récupère et affiche les informations complètes d'un objet
+ * en utilisant l'identifiant présent dans l'URL.
+ */
 export default function ObjectDetail() {
   const { id } = useParams();
-  const router = useRouter();
   const [object, setObject] = useState<ObjectItem | null>(null);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchObject = async () => {
-      try {
-        const res = await axios.get(`${API}/objects/${id}`);
-        setObject(res.data);
-      } catch (error) {
-        console.error('Erreur fetch object:', error);
-        toast.error("Objet introuvable");
-        router.push('/');
-      } finally {
-        setLoading(false);
-      }
-    };
-    if (id) fetchObject();
+    // Récupération de l'objet dès que l'id est disponible
+    if (id) {
+      axios.get(`${API}/objects/${id}`).then((res) => setObject(res.data));
+    }
   }, [id]);
 
-  const handleDelete = async () => {
-    try {
-      await axios.delete(`${API}/objects/${id}`);
-      toast.success('Objet supprimé !');
-      router.push('/');
-    } catch (error) {
-      toast.error('Erreur lors de la suppression');
-    }
-  };
-
-  if (loading) return (
-    <div className="min-h-screen flex items-center justify-center">
-      <p className="text-gray-500 text-lg">Chargement...</p>
+  // Affichage d'un message de chargement pendant la récupération
+  if (!object) return (
+    <div className="min-h-screen bg-white flex items-center justify-center">
+      <p className="text-gray-400 text-lg">Chargement...</p>
     </div>
   );
 
-  if (!object) return null;
-
   return (
     <main className="min-h-screen bg-white">
+      {/* En-tête */}
       <div className="bg-blue-600 shadow-md">
         <div className="container mx-auto px-6 py-5">
-          <h1 className="text-3xl font-bold text-white tracking-tight">Heyama Objects</h1>
+          <h1 className="text-3xl font-bold text-white">Heyama Objects</h1>
           <p className="text-blue-100 text-sm mt-1">Détail de l'objet</p>
         </div>
       </div>
 
       <div className="container mx-auto px-6 py-10 max-w-2xl">
+        {/* Bouton retour vers la liste */}
         <Link href="/">
           <Button variant="outline" className="mb-6 border-blue-200 text-blue-600 hover:bg-blue-50">
-            ← Retour à la liste
+            Retour
           </Button>
         </Link>
 
+        {/* Carte de détail de l'objet */}
         <Card className="border border-blue-100 shadow-md overflow-hidden">
-          <div className="relative">
-            <img
-              src={object.imageUrl}
-              alt={object.title}
-              className="w-full h-64 object-cover"
-            />
-            <div className="absolute bottom-2 right-2 bg-blue-600 text-white text-xs px-2 py-1 rounded-full">
-              {new Date(object.createdAt).toLocaleDateString('fr-FR')}
-            </div>
-          </div>
-          <CardHeader className="bg-blue-50">
-            <CardTitle className="text-blue-700 text-2xl">{object.title}</CardTitle>
-          </CardHeader>
+          <img src={object.imageUrl} alt={object.title} className="w-full h-72 object-cover" />
           <CardContent className="p-6 space-y-4">
-            <p className="text-gray-600 text-base leading-relaxed">{object.description}</p>
-            <Button
-              variant="destructive"
-              className="w-full"
-              onClick={handleDelete}
-            >
-              Supprimer cet objet
-            </Button>
+            <h2 className="text-2xl font-bold text-gray-800">{object.title}</h2>
+            <p className="text-gray-500">{object.description}</p>
+            <div className="pt-2 border-t border-blue-100">
+              <p className="text-sm text-blue-600">
+                Créé le : {new Date(object.createdAt).toLocaleDateString('fr-FR')}
+              </p>
+            </div>
           </CardContent>
         </Card>
       </div>
