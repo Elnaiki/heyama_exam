@@ -8,7 +8,7 @@ import axios from 'axios';
 import { useRouter } from 'expo-router';
 import { io } from 'socket.io-client';
 
-const API = 'http://172.30.24.79:3000';
+const API = 'https://heyamaexam-production.up.railway.app';
 const socket = io(API);
 
 interface ObjectItem {

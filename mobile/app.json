@@ -46,5 +46,15 @@
     "eslint-config-expo": "~10.0.0",
     "typescript": "~5.9.2"
   },
-  "private": true
+  "private": true,
+  "extra": {
+    "eas": {
+      "projectId": "83f21d8b-2c1a-49f0-82b0-a1c2fd43af1a"
+    }
+  },
+  "expo": {
+    "android": {
+      "package": "com.naikprospere.mobile"
+    }
+  }
 }
