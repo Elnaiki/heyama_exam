@@ -1,0 +1,8 @@
+<<<<<<< HEAD
+node_modules 
+.expo 
+.env 
+=======
+.next 
+node_modules
+>>>>>>> cac1347d57576a88b615ed061aa29beb4711b9a5
