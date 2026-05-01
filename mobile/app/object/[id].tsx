@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import {
   View, Text, Image, StyleSheet,
-  ActivityIndicator, SafeAreaView, TouchableOpacity
+  ActivityIndicator, SafeAreaView, TouchableOpacity, Alert
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import axios from 'axios';
 
-const API = 'http://172.30.24.79:3000';
+const API = 'https://heyamaexam-production.up.railway.app';
 
 interface ObjectItem {
   _id: string;
@@ -20,18 +20,26 @@ export default function ObjectDetail() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
   const [object, setObject] = useState<ObjectItem | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (id) {
-      axios.get(`${API}/objects/${id}`).then((res) => setObject(res.data));
-    }
+    if (!id) return;
+    axios.get(`${API}/objects/${id}`)
+      .then(res => setObject(res.data))
+      .catch(() => {
+        Alert.alert('Erreur', 'Objet introuvable');
+        router.back();
+      })
+      .finally(() => setLoading(false));
   }, [id]);
 
-  if (!object) return (
+  if (loading) return (
     <View style={styles.center}>
       <ActivityIndicator size="large" color="#2563eb" />
     </View>
   );
+
+  if (!object) return null;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -41,9 +49,7 @@ export default function ObjectDetail() {
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Détail</Text>
       </View>
-
       <Image source={{ uri: object.imageUrl }} style={styles.image} />
-
       <View style={styles.content}>
         <Text style={styles.title}>{object.title}</Text>
         <Text style={styles.description}>{object.description}</Text>
@@ -60,31 +66,14 @@ export default function ObjectDetail() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  header: {
-    backgroundColor: '#2563eb',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16,
-  },
-  backButton: {
-    backgroundColor: '#1d4ed8',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
-  },
+  header: { backgroundColor: '#2563eb', paddingHorizontal: 20, paddingVertical: 16, flexDirection: 'row', alignItems: 'center', gap: 16 },
+  backButton: { backgroundColor: '#1d4ed8', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8 },
   backText: { color: '#fff', fontWeight: '600' },
   headerTitle: { fontSize: 20, fontWeight: 'bold', color: '#fff' },
   image: { width: '100%', height: 260 },
   content: { padding: 20, gap: 12 },
   title: { fontSize: 24, fontWeight: 'bold', color: '#1e293b' },
   description: { fontSize: 16, color: '#64748b', lineHeight: 24 },
-  dateBadge: {
-    backgroundColor: '#eff6ff',
-    borderRadius: 8,
-    padding: 10,
-    marginTop: 8,
-  },
+  dateBadge: { backgroundColor: '#eff6ff', borderRadius: 8, padding: 10, marginTop: 8 },
   dateText: { color: '#2563eb', fontSize: 13, fontWeight: '600' },
 });
