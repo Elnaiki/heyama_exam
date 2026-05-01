@@ -20,14 +20,36 @@ export default function ObjectDetail() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!id) return;
     axios.get(`${API}/objects/${id}`)
-      .then(res => setObject(res.data))
-      .catch(() => Alert.alert('Erreur', 'Objet introuvable'))
+      .then(res => {
+        if (res.data) {
+          setObject(res.data);
+        } else {
+          Alert.alert('Erreur', 'Objet introuvable');
+          router.back();
+        }
+      })
+      .catch((e) => {
+        console.error(e);
+        Alert.alert('Erreur', "Impossible de charger l'objet");
+        router.back();
+      })
       .finally(() => setLoading(false));
   }, [id]);
 
-  if (loading) return <ActivityIndicator style={{ flex: 1 }} size="large" color="#2563eb" />;
-  if (!object) return <Text style={styles.error}>Objet introuvable</Text>;
+  if (loading) return (
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <ActivityIndicator size="large" color="#2563eb" />
+      <Text style={{ marginTop: 10, color: '#64748b' }}>Chargement...</Text>
+    </View>
+  );
+
+  if (!object) return (
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <Text style={styles.error}>Objet introuvable</Text>
+    </View>
+  );
 
   return (
     <ScrollView style={styles.container}>
@@ -35,7 +57,9 @@ export default function ObjectDetail() {
       <View style={styles.content}>
         <Text style={styles.title}>{object.title}</Text>
         <Text style={styles.description}>{object.description}</Text>
-        <Text style={styles.date}>{new Date(object.createdAt).toLocaleDateString('fr-FR')}</Text>
+        <Text style={styles.date}>
+          {new Date(object.createdAt).toLocaleDateString('fr-FR')}
+        </Text>
         <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
           <Text style={styles.backButtonText}>← Retour</Text>
         </TouchableOpacity>
