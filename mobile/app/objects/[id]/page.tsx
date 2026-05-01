@@ -3,7 +3,7 @@ import { View, Text, Image, StyleSheet, ActivityIndicator, TouchableOpacity, Scr
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import axios from 'axios';
 
-const API = 'http://172.30.24.79:3000';
+const API = 'https://heyamaexam-production.up.railway.app';
 
 interface ObjectItem {
   _id: string;
